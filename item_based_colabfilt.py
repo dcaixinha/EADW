@@ -21,9 +21,8 @@ def adjusted_cosine_similarity(a, b, userDict):
         for val in userDict[user_id].values():
             avgs[user_id] += val
         avgs[user_id] = (avgs[user_id]+0.0)/len(userDict[user_id].values())
-    #DUVIDA: esta avg eh sobre todos os items avaliados pelo user, ou so sobre os 2 items q estao
-    #a ser comparados
-            #print avgs[set_u[0]]
+    #esta avg eh sobre todos os items avaliados pelo user
+    #print avgs[set_u[0]]
 
     #calcular o numerador e o denominador do quociente
     sum_numerator = 0
@@ -79,9 +78,12 @@ def compare_item_against_user_rated(user_rated, target, items, user):
     #calculate the similarity between each item the user rated and the target item
     for item_id in user_rated:
         similarity = adjusted_cosine_similarity(items[item_id], items[target], usrs)
-        similarities += similarity
-        #multiply by the rate the user gave that items
-        results[item_id] = similarity*items[item_id][user]
+        if similarity > 0.4: #so nos interessam os mais semelhantes
+            #print item_id,":",target,"=>",similarity,",",items[item_id][user],"(",(similarity**2)*items[item_id][user],")"
+            #use the swaure of the similarity(to give more weight to the higher similarities' scores)
+            similarities += similarity**2
+            #multiply by the rate the user gave that items
+            results[item_id] = (similarity**2)*items[item_id][user]
 
     result = 0
     for val in results.values():
@@ -100,7 +102,7 @@ def get_user_rated_item_ids(user_id, users):
 if __name__ == '__main__':
 
     user = "180"
-    target = "242"
+    target = "398"
 
     items, usrs = get_dictionaries('u.data')
     user_rated_items = get_user_rated_item_ids(user, usrs)
