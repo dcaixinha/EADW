@@ -11,11 +11,7 @@ def adjusted_cosine_similarity(a, b, userDict):
     for user_id in a.keys():
         if user_id in b.keys():
             set_u.append(user_id)
-    for user_id in b.keys():
-        if user_id in a.keys() and user_id not in set_u:
-            set_u.append(user_id)
 
-            #print set_u
     #para cada user no set_u, calcular a media global dos seus ratings
     for user_id in set_u:
         avgs[user_id] = 0
@@ -84,7 +80,7 @@ def compare_item_against_user_rated(user_rated, target, items, user, usrs):
     for item_id in user_rated:
         similarity = adjusted_cosine_similarity(items[item_id], items[target], usrs)
         genre_similarity = get_genre_similarity(target, item_id)
-        if similarity > 0.1: #so nos interessam os mais semelhantes
+        if similarity > 0: #so nos interessam os mais semelhantes
             similarity *= genre_similarity
             if __name__ == '__main__':
                 print item_id,":",target,"=>",similarity,",",items[item_id][user],"(",(similarity**2)*items[item_id][user],")"
