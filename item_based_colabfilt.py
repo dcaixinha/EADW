@@ -1,4 +1,5 @@
 import math
+from content_based_filter import *
 
 #items a and b are dictionaries <user_id : rating> and may not have the values for all users
 def adjusted_cosine_similarity(a, b, userDict):
@@ -78,10 +79,13 @@ def get_dictionaries(file_name):
 def compare_item_against_user_rated(user_rated, target, items, user, usrs):
     results = {}
     similarities = 0
+
     #calculate the similarity between each item the user rated and the target item
     for item_id in user_rated:
         similarity = adjusted_cosine_similarity(items[item_id], items[target], usrs)
-        if similarity > 0.4: #so nos interessam os mais semelhantes
+        genre_similarity = get_genre_similarity(target, item_id)
+        if similarity > 0.1: #so nos interessam os mais semelhantes
+            similarity *= genre_similarity
             if __name__ == '__main__':
                 print item_id,":",target,"=>",similarity,",",items[item_id][user],"(",(similarity**2)*items[item_id][user],")"
             #use the square of the similarity(to give more weight to the higher similarities' scores)
@@ -92,7 +96,10 @@ def compare_item_against_user_rated(user_rated, target, items, user, usrs):
     result = 0
     for val in results.values():
         result += val
-    result /= (0.0+similarities) #media ponderada pelo quadrado das similarities
+    if similarities > 0:
+        result /= (0.0+similarities) #media ponderada pelo quadrado das similarities
+    else:
+        result = 0
     return result
 
 
