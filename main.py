@@ -1,5 +1,6 @@
 from item_based_colabfilt import *
 from content_based_filter import *
+from user_based_colabfilt import *
 
 
 items = {}
@@ -35,9 +36,10 @@ def batch_testing():
                 #Comment this later, MAE
                 score = array[2]
 
-                user_rated_items = get_user_rated_item_ids(user_id, users)
+
                 #score_prediction = randint(1, 5)
-                score_prediction = compare_item_against_user_rated(user_rated_items, item_id, items, user_id, users)
+                score_prediction = predict_score_item_based(user_id, item_id, users, items)
+            #    score_prediction = predict_score_user_based(user_id, item_id, users)
                 #if score_prediction > 5.0:
                 #    score_prediction = 5.0
                 #print "User with id", user_id, "would give the movie with id", item_id, "a score of", score_prediction

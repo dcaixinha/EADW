@@ -72,22 +72,25 @@ def get_dictionaries(file_name):
         return None, None
 
 #user_rated list<string> with item ids, target string with item_id, items dictionary of items
-def compare_item_against_user_rated(user_rated, target, items, user, usrs):
+def predict_score_item_based(user_id, target, usrs, items):
     results = {}
     similarities = 0
 
+    #get items that this user rated
+    user_rated_items = get_user_rated_item_ids(user_id, usrs)
+
     #calculate the similarity between each item the user rated and the target item
-    for item_id in user_rated:
+    for item_id in user_rated_items:
         similarity = adjusted_cosine_similarity(items[item_id], items[target], usrs)
         genre_similarity = get_genre_similarity(target, item_id)
         if similarity > 0: #so nos interessam os mais semelhantes
             similarity *= genre_similarity
             if __name__ == '__main__':
-                print item_id,":",target,"=>",similarity,",",items[item_id][user],"(",(similarity**2)*items[item_id][user],")"
+                print item_id,":",target,"=>",similarity,",",usrs[user_id][item_id],"(",(similarity**2)*usrs[user_id][item_id],")"
             #use the square of the similarity(to give more weight to the higher similarities' scores)
             similarities += similarity**2
             #multiply by the rate the user gave that items
-            results[item_id] = (similarity**2)*items[item_id][user]
+            results[item_id] = (similarity**2)*usrs[user_id][item_id]
 
     result = 0
     for val in results.values():
@@ -95,7 +98,7 @@ def compare_item_against_user_rated(user_rated, target, items, user, usrs):
     if similarities > 0:
         result /= (0.0+similarities) #media ponderada pelo quadrado das similarities
     else:
-        result = 0
+        result = 3 #se nao houver outros filmes semelhantes dizemos q o score eh default: 3
     return result
 
 
