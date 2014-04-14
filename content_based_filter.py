@@ -83,8 +83,8 @@ def get_genre_similarity(item_id_1, item_id_2):
     if total_genres_item_1 == total_common_genres:
         return 1
     if total_common_genres > 0:
-        return 0.1
-    return 0.1
+        return 0.01
+    return 0.01
 
 def init_genres():
     fill_genre_names()

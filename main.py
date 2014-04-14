@@ -42,8 +42,8 @@ def batch_testing():
                 #    score_prediction = 5.0
                 #print "User with id", user_id, "would give the movie with id", item_id, "a score of", score_prediction
                 #f_write.write(user_id + '\t' + item_id + '\t' + repr(score_prediction) + '\n')
-                error = abs(int(score) - score_prediction + 0.0)/int(score)
-                f_write.write(user_id + '\t' + item_id + '\t' + repr(score_prediction) + '\t' + repr(error) + '\n')
+                error = abs(int(score) - int(score_prediction) + 0.0)/int(score)
+                f_write.write(user_id + '\t' + item_id + '\t' + repr(int(score_prediction)) + '\t' + repr(error) + '\n')
                 errors.append(error)
             mae = 0
             for err in errors:
