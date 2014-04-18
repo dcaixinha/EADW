@@ -38,14 +38,17 @@ def batch_testing():
 
 
                 #score_prediction = randint(1, 5)
-                score_prediction = predict_score_item_based(user_id, item_id, users, items)
+                score_prediction, count , top_similarities = predict_score_item_based(user_id, item_id, users, items)
             #    score_prediction = predict_score_user_based(user_id, item_id, users)
                 #if score_prediction > 5.0:
                 #    score_prediction = 5.0
                 #print "User with id", user_id, "would give the movie with id", item_id, "a score of", score_prediction
                 #f_write.write(user_id + '\t' + item_id + '\t' + repr(score_prediction) + '\n')
-                error = abs(int(score) - int(score_prediction) + 0.0)/int(score)
-                f_write.write(user_id + '\t' + item_id + '\t' + repr(int(score_prediction)) + '\t' + repr(error) + '\n')
+                error = abs(int(score) - score_prediction)
+                f_write.write(user_id + '\t' + item_id + '\t' + score + '\t' + repr(score_prediction) + '\t' + repr(error) + '\t[' + repr(count) + ']\t')
+                top_similarities_list = top_similarities.values()
+                top_similarities_list.sort()
+                f_write.write(repr('%.2f' % top_similarities_list[0]) + '\t' + repr('%.2f' % top_similarities_list[-1]) + '\n')
                 errors.append(error)
             mae = 0
             for err in errors:

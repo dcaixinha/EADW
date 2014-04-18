@@ -74,7 +74,9 @@ def get_dictionaries(file_name):
 #user_rated list<string> with item ids, target string with item_id, items dictionary of items
 def predict_score_item_based(user_id, target, usrs, items):
     results = {}
-    similarities = 0
+    top_similarities = {}
+    sum_similarities = 0
+    similarity_count = 0
 
     #get items that this user rated
     user_rated_items = get_user_rated_item_ids(user_id, usrs)
@@ -82,25 +84,51 @@ def predict_score_item_based(user_id, target, usrs, items):
     #calculate the similarity between each item the user rated and the target item
     for item_id in user_rated_items:
         similarity = adjusted_cosine_similarity(items[item_id], items[target], usrs)
-        genre_similarity = get_genre_similarity(target, item_id)
-        if similarity > 0: #so nos interessam os mais semelhantes
-            similarity *= genre_similarity
-            if __name__ == '__main__':
-                print item_id,":",target,"=>",similarity,",",usrs[user_id][item_id],"(",(similarity**2)*usrs[user_id][item_id],")"
-            #use the square of the similarity(to give more weight to the higher similarities' scores)
-            similarities += similarity**2
-            #multiply by the rate the user gave that items
-            results[item_id] = (similarity**2)*usrs[user_id][item_id]
+        if similarity > -0.83 and similarity < 0.98: #so nos interessam os mais semelhantes
+            #se for maior que algum elemento na lista insere, retorna true se inseriu
+            similarity_count = insert_top_sim(similarity, item_id, top_similarities)
+
+    #no fim pegar nos top similarities e calcular
+    for item_id, similarity in top_similarities.iteritems():
+        #genre_similarity = get_genre_similarity(target, item_id)
+        #similarity *= genre_similarity
+        if __name__ == '__main__':
+            print item_id,":",target,"=>",similarity,",",usrs[user_id][item_id],"(",(similarity**2)*usrs[user_id][item_id],")"
+        #use the square of the similarity(to give more weight to the higher similarities' scores)
+        sum_similarities += similarity**2
+        #multiply by the rate the user gave that items
+        results[item_id] = (similarity**2)*usrs[user_id][item_id]
 
     result = 0
     for val in results.values():
         result += val
-    if similarities > 0:
-        result /= (0.0+similarities) #media ponderada pelo quadrado das similarities
+    if sum_similarities != 0:
+        result /= (0.0+sum_similarities) #media ponderada pelo quadrado das similarities
     else:
         result = 3 #se nao houver outros filmes semelhantes dizemos q o score eh default: 3
-    return result
+    return result, similarity_count, top_similarities
 
+#inserts only if this similarity is bigger than some other similarity within
+#if so, it will remove the lowest similarity and keep this one in its stead
+def insert_top_sim(similarity, item_id, top_similarities):
+    max_similarity_count = 41
+
+    if len(top_similarities.keys()) < max_similarity_count:
+        top_similarities[item_id] = similarity
+    else:
+        #encontrar o menor valor
+        min = 10
+        min_item_id = -1;
+        for item_id_stored, similarity_stored in top_similarities.iteritems():
+            if similarity_stored < min:
+                min = similarity_stored
+                min_item_id = item_id_stored
+        #verificar se o menor valor eh menor que o que vamos inserir
+        if min < similarity:
+            del top_similarities[min_item_id]
+            top_similarities[item_id] = similarity
+
+    return len(top_similarities.keys())
 
 def get_user_rated_item_ids(user_id, users):
     result = []
