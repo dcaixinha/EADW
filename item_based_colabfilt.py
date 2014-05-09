@@ -64,7 +64,6 @@ def predict_score_item_based(user_id, target, usrs, items, movie_synopsys, top_c
     #calculate the similarity between each item the user rated and the target item
     for item_id in user_rated_items:
         if target in items:
-            print 'ENTREI NO IF, VOU FAZER O COS SIMIL!!!'
             similarity = adjusted_cosine_similarity(items[item_id], items[target], usrs)
             if similarity > -0.83 and similarity < 0.98: #magical parameters from trial and error
                 #it will only insert in the list if its bigger than one of the values already present
@@ -77,14 +76,7 @@ def predict_score_item_based(user_id, target, usrs, items, movie_synopsys, top_c
         synop_similarity = get_synop_similarity(target, item_id, movie_synopsys)
         cast_similarity = get_top_cast_similarity(target, item_id, top_cast_dict)
 
-        print 'THE GENRE SIMILARITY IS', genre_similarity
-        print 'THE SYNOP SIMILARITY IS', synop_similarity
-        print 'THE CAST SIMILARITY IS', cast_similarity
-        print 'THE SIMILARITY ITSELF IS', similarity
-
         similarity = ((1*similarity) + (2*genre_similarity) + (1*synop_similarity) + (4*cast_similarity)) / (8 + 0.0)
-
-        print 'AFTER AVERAGE IS', similarity
 
         #use the square of the similarity(to give more weight to the higher similarities' scores)
         sum_similarities += similarity**2
@@ -94,13 +86,9 @@ def predict_score_item_based(user_id, target, usrs, items, movie_synopsys, top_c
     result = 0
     for val in results.values():
         result += val
-    print 'THE RESULT AFTER FOR IS', result
-    print 'THE SUM_SIMILARITIES AFTER FOR IS', sum_similarities
     if sum_similarities != 0:
         result /= (0.0+sum_similarities)  #average weighted by the square of the similarities
-        print 'AND THE FINAL RESULT IS', result
     else:
-        print 'AND THE FINAL RESULT IS THE DEFAULT'
         result = 3  #if there are no similar movies the default score is 3 (this is very rare)
     return result
 

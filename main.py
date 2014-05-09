@@ -42,6 +42,7 @@ def batch_training(mode_input):
 #Returns items_dict: <item_id : < user_id : rating >> and users <user_id : <item_id : rating>>
 def get_dictionaries(file_name):
     try:
+
         f = open(file_name, 'r')
 
         items_dict = {}  #dictionary of dictionaries
@@ -55,7 +56,7 @@ def get_dictionaries(file_name):
             item_id = array[1]
             rating = array[2]
             #if the user didnt exist, we need to create the items dictionary for that user
-            if int(user_id) not in users.keys():
+            if int(user_id) not in users_dict.keys():
                 users_dict[int(user_id)] = {}
             #adds the rating for an item for that user
             users_dict[int(user_id)][int(item_id)] = int(rating)

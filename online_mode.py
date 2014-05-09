@@ -4,6 +4,7 @@
 import sys
 import random
 import urllib
+import time
 from main import get_dictionaries
 from item_based_colabfilt import predict_score_item_based
 from PyQt4 import QtCore, QtGui
@@ -326,14 +327,11 @@ class EADW_Proj_Window(QtGui.QWidget):
         self.ids_generated.append(recommend_mov_id)
 
         # print 'THE UID2 IS', uid_2, 'THE RECOMMENDEDMOVID IS', recommend_mov_id
-        # print 'O USERS DICT E', users_dict
-        # print 'O ITEMS DICT E', items_dict
+        #
         # print 'O SYNOPS DICT E', self.synops_dict
         # print 'O TOPCAST DICT E', self.tcast_dict
 
-        score_prediction = predict_score_item_based(int(uid_2), int(recommend_mov_id), users_dict, items_dict, self.synops_dict, self.tcast_dict)
-
-        print 'THE SCORE PREDICTION IS', score_prediction
+        score_prediction = predict_score_item_based(uid_2, recommend_mov_id, users_dict, items_dict, self.synops_dict, self.tcast_dict)
 
         self.for_movie_name.show()
 
