@@ -1,6 +1,10 @@
 import math
 from item_based_colabfilt import get_dictionaries
 
+#user is the user_id
+#target is the target item_id
+#usrs is the dictionary <user_id : <item_id : rating>>
+#Returns a list of user_ids who rated all of the items that I rated
 def get_users_who_rated_same_as_me(user, target, usrs):
     users = []
     my_items = usrs[user].keys()
@@ -10,25 +14,26 @@ def get_users_who_rated_same_as_me(user, target, usrs):
         for item in my_items:
             if item in usrs[usr].keys():
                 counted += 1
-        #se este user tambem deu rate a todos os meus
+        #if this user rated all of my items
         if counted > user_items_count/2:
-            #se alem disso tambem deu rate ao target
+            #and if also rated the target
             if target in usrs[usr].keys():
                 users.append(usr)
     return users
 
+#Calculates the cosine similarity between 2 users
 def user_adjusted_cosine_similarity(user_id_a, user_id_b, usrs):
 
     avgs = {}
 
     set_p = []
 
-    #get set of items rated by both users a and b, set_p
+    #get set of items rated by both users a and b -> set_p
     for item_id in usrs[user_id_a].keys():
         if item_id in usrs[user_id_b].keys():
             set_p.append(item_id)
 
-    #para cada user (a e b) calcular a media global dos seus ratings
+    #for user a and b calculate the global average of their ratings -> avgs
     avgs[user_id_a] = 0
     for rating in usrs[user_id_a].values():
         avgs[user_id_a] += rating
@@ -39,7 +44,7 @@ def user_adjusted_cosine_similarity(user_id_a, user_id_b, usrs):
         avgs[user_id_b] += rating
     avgs[user_id_b] = (avgs[user_id_b]+0.0)/len(usrs[user_id_b].values())
 
-    #calcular o numerador e o denominador do quociente
+    #calculate the numerator and the denominator
     sum_numerator = 0
     sum_denominator_a = 0
     sum_denominator_b = 0
@@ -52,14 +57,15 @@ def user_adjusted_cosine_similarity(user_id_a, user_id_b, usrs):
     sum_denominator_a = math.sqrt( sum_denominator_a )
     sum_denominator_b = math.sqrt( sum_denominator_b )
 
-    if sum_numerator == 0:  #caso raro (com apenas 1 user que deu a mesma cotacao a todas as avaliacoes)
-        return 0            #senao dava divisao por zero...
+    if sum_numerator == 0:  #rare case
+        return 0            #avoid division by zero...
 
     return (sum_numerator+0.0)/(sum_denominator_a*sum_denominator_b)
 
-#dado um user e um item, vou ver quais os users que avaliaram os mesmos items que este user,
-#depois calculo a similaridade com cada um destes users
-#depois peso o score que eles deram pelo qdrado da similaridade que eu tiver com eles
+#Given a user and an item, get the users who gave score to the same items of the user,
+#then calculate the similarity between the user and all those other users
+#finally weigh the score each user gave to the item in question (item_id) by the square
+#of the similarity between that user and the initial user.
 def predict_score_user_based(user_id, item_id, usrs):
     users_who_rated = get_users_who_rated_same_as_me(user_id, item_id, usrs)
 
@@ -69,7 +75,7 @@ def predict_score_user_based(user_id, item_id, usrs):
     #calculate the similarity between each user who has rated the same as me, and me
     for usr_id in users_who_rated:
         similarity = user_adjusted_cosine_similarity(user_id, usr_id, usrs)
-        if similarity > 0: #so nos interessam os mais semelhantes
+        if similarity > 0: #filtering only the positive similarities
             if __name__ == '__main__':
                 print user_id,":",usr_id,"=>",similarity,",",usrs[usr_id][item_id],"(",(similarity**2)*usrs[usr_id][item_id],")"
             #use the square of the similarity(to give more weight to the higher similarities' scores)
@@ -81,18 +87,7 @@ def predict_score_user_based(user_id, item_id, usrs):
     for val in results.values():
         result += val
     if similarities > 0:
-        result /= (0.0+similarities) #media ponderada pelo quadrado das similarities
+        result /= (0.0+similarities) #average weighted by the square of the similarities
     else:
-        result = 3 #se nao houver outros users semelhantes dizemos q o score eh default: 3
+        result = 3 #if there are no similar users we say the default value is 3
     return result
-
-if __name__ == '__main__':
-
-    user = "40"
-    target = "700"
-
-    #retorna items_dict fica: <item_id : < user_id : rating >> e users <user_ids : <item_id : rating>>
-    items, usrs = get_dictionaries('u.data')
-
-    score_prediction = predict_score_user_based(user, target, usrs)
-    print "User with id",user,"would give the movie with id", target, "a score of", score_prediction

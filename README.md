@@ -1,4 +1,0 @@
-EADW
-====
-
-EADW Project Repository
